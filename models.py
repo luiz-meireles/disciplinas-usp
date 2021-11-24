@@ -16,8 +16,18 @@ class BaseModel(Model):
         database = db
 
 
+class Unit(BaseModel):
+    name = CharField()
+    code = CharField()
+
+    class Meta:
+        indexes = ((("name",), True),)
+
+
 class Department(BaseModel):
     name = CharField()
+    code = CharField()
+    unit_code = CharField()
 
     class Meta:
         indexes = ((("name",), True),)
@@ -48,7 +58,7 @@ class ErrorLogger(BaseModel):
 
 db.connect()
 db.create_tables(
-    [Subject, ErrorLogger, SubjectRequirement, Department],
+    [Subject, ErrorLogger, SubjectRequirement, Department, Unit],
 )
 
 
@@ -65,6 +75,23 @@ def get_subject_requirements(subject_codes=[]):
         return query.where(Subject.code.in_(subject_codes))
 
     return query
+
+
+def add_unit(unit):
+    try:
+        Unit.insert(**unit).execute()
+    except IntegrityError:
+        pass
+
+
+def update_department(code, name, unit_code):
+    try:
+        department = Department.get(Department.name == name)
+        department.code = code
+        department.unit_code = unit_code
+        department.save()
+    except Department.DoesNotExist as e:
+        print(e)
 
 
 def get_deep_subject_requirements(

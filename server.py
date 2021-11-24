@@ -3,8 +3,13 @@ import re
 from typing import List, Optional
 from fastapi import FastAPI
 from fastapi.params import Query
+import pydantic
 from starlette.responses import JSONResponse
-from models import get_deep_subject_requirements
+from models import (
+    get_deep_subject_requirements,
+    add_unit,
+    update_department as _update_department,
+)
 from pydantic import BaseModel
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,6 +27,17 @@ app.add_middleware(
 )
 
 
+class Unit(BaseModel):
+    code: str
+    name: str
+
+
+class Department(BaseModel):
+    code: str
+    name: str
+    unit_code: str
+
+
 @app.get(
     "/requirements/",
 )
@@ -33,3 +49,20 @@ async def read_root(subject: List[str] = Query([])):
     )
 
     return JSONResponse(requirements_by_subject)
+
+
+@app.post("/unit")
+async def add_unidade(unidade: Unit):
+    add_unit({"code": unidade.code, "name": unidade.name})
+    return JSONResponse({})
+
+
+@app.post("/department")
+async def update_department(department: Department):
+    print(department)
+    _update_department(
+        department.code,
+        department.name,
+        department.unit_code,
+    )
+    return JSONResponse({})
