@@ -28,6 +28,7 @@ class Department(BaseModel):
     name = CharField()
     code = CharField()
     unit_code = CharField()
+    unit = ForeignKeyField(Unit)
 
     class Meta:
         indexes = ((("name",), True),)
@@ -55,6 +56,8 @@ class ErrorLogger(BaseModel):
     subject_code = TextField()
     error = TextField()
 
+
+# migrate(migrator.drop_column("department", "unit_code"))
 
 db.connect()
 db.create_tables(

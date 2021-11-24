@@ -34,3 +34,21 @@ def associate_subject_departments():
                 Subject.update(department=department).where(
                     Subject.department_name == department.name
                 ).execute()
+
+
+def associate_unit_departments():
+    units = Unit.select()
+    deparments = Department.select()
+    units_by_code = {unit.code: unit for unit in units}
+    with db.atomic():
+        for department in deparments:
+            unit = units_by_code.get(department.unit_code)
+            print(f"Associating subject {department.name} with department {unit.name}")
+            print(department.name, department.id)
+            if unit:
+                Department.update(unit=unit).where(
+                    Department.unit_code == unit.code
+                ).execute()
+
+
+associate_unit_departments()
